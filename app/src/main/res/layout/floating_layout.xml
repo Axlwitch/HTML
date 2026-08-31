@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#2D2D3D"
+    android:padding="3dp">
+
+    <LinearLayout
+        android:id="@+id/lnrHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#3D3D5D"
+        android:padding="4dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/txtHeaderDrag"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="≡"
+            android:textColor="#89B4FA"
+            android:textSize="16sp"
+            android:padding="2dp"
+            android:gravity="center_vertical" />
+
+        <Spinner
+            android:id="@+id/spinnerPilihApp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="60dp"
+            android:background="#4A4A6A"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:spinnerMode="dropdown" />
+
+        <Button
+            android:id="@+id/btnRotate"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:text="↻"
+            android:textColor="#FFFFFF"
+            android:background="#4A4A6A"
+            android:textSize="14sp"
+            android:padding="0dp"
+            android:layout_marginStart="3dp" />
+
+        <Button
+            android:id="@+id/btnMinimizeApp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:text="-"
+            android:textColor="#FFFFFF"
+            android:background="#4A4A6A"
+            android:textSize="14sp"
+            android:padding="0dp" />
+
+        <Button
+            android:id="@+id/btnFullWindow"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:text="⛶"
+            android:textColor="#FFFFFF"
+            android:background="#4A4A6A"
+            android:textSize="12sp"
+            android:padding="0dp"
+            android:layout_marginStart="3dp" />
+
+        <Button
+            android:id="@+id/btnCloseApp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:text="✕"
+            android:textColor="#FF5555"
+            android:background="#4A4A6A"
+            android:textSize="12sp"
+            android:padding="0dp"
+            android:layout_marginStart="3dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lnrMainContent"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:background="#1A1A2E">
+
+        <WebView
+            android:id="@+id/floatWebView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#000000"
+            android:overScrollMode="always" />
+    </LinearLayout>
+</LinearLayout>
