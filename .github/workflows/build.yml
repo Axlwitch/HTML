@@ -11,6 +11,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Setup Gradle Cache
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 6.9.3
+          cache-disabled: false
+
       - name: Set up JDK 8
         uses: actions/setup-java@v4
         with:
@@ -26,12 +32,18 @@ jobs:
       - name: Build Debug APK
         run: |
           echo "🔨 Build started at $(date '+%Y-%m-%d %H:%M:%S')"
+          START_TIME=$(date +%s)
+          
           if [ -f gradlew ]; then
             ./gradlew assembleDebug --stacktrace
           else
             gradle assembleDebug --stacktrace
           fi
+          
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
           echo "✅ Build finished at $(date '+%Y-%m-%d %H:%M:%S')"
+          echo "⏱️  Build duration: ${DURATION} seconds ($(($DURATION / 60)) minutes $(($DURATION % 60)) seconds)"
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
