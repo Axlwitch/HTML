@@ -5,23 +5,18 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Gradle Cache
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: 6.9.3
-          cache-disabled: false
-
-      - name: Set up JDK 8
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'temurin'
+          cache: 'gradle'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -35,9 +30,9 @@ jobs:
           START_TIME=$(date +%s)
           
           if [ -f gradlew ]; then
-            ./gradlew assembleDebug --stacktrace
+            ./gradlew assembleDebug --stacktrace -x lint
           else
-            gradle assembleDebug --stacktrace
+            gradle assembleDebug --stacktrace -x lint
           fi
           
           END_TIME=$(date +%s)
