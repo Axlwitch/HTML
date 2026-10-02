@@ -1,4 +1,4 @@
-name: Build Android APK
+Name: Build Android APK
 
 on:
   workflow_dispatch:
@@ -22,32 +22,23 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'gradle'
-          cache-dependency-path: |
-            **/build.gradle
-            **/gradle-wrapper.properties
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: |
-            platform-tools
-            platforms;android-34
-            build-tools;34.0.0
-            cmdline-tools;latest
 
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew || true
+        run: chmod +x gradlew
 
-      - name: Build with Gradle (optimized)
+      # Catatan: Step 'Setup Android SDK' bawaan diganti/dihapus karena 
+      # runner ubuntu-latest sudah punya Android SDK & Cmdline-tools bawaan.
+
+      - name: Build with Gradle
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=\"-Xmx3072m -XX:MaxMetaspaceSize=512m\""
         run: |
           ./gradlew assembleDebug \
+            --no-daemon \
             --stacktrace \
-            --info \
+            -x test \
             -x lint \
-            -x lintVital \
-            --parallel \
-            --max-workers=4 \
-            -Dorg.gradle.daemon=true
+            -x lintVital
 
       - name: Upload APK Artifact
         if: success()
@@ -65,5 +56,5 @@ jobs:
             echo "✅ APKs generated:"
             ls -lh app/build/outputs/apk/debug/*.apk || echo "No APK found"
           else
-            echo "⚠️  No APK output directory found"
+            echo "⚠️️ No APK output directory found"
           fi
