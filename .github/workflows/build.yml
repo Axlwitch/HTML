@@ -2,10 +2,15 @@ name: Build Android APK
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout Repository
@@ -17,41 +22,48 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'gradle'
+          cache-dependency-path: |
+            **/build.gradle
+            **/gradle-wrapper.properties
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
           packages: |
             platform-tools
-            platforms;android-33
-            build-tools;33.0.0
+            platforms;android-34
+            build-tools;34.0.0
+            cmdline-tools;latest
 
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew || echo "gradlew not found, will use gradle directly"
+        run: chmod +x gradlew || true
 
-      - name: Build Debug APK
+      - name: Build with Gradle (optimized)
         run: |
-          echo "🔨 Build started at $(date '+%Y-%m-%d %H:%M:%S')"
-          START_TIME=$(date +%s)
-
-          if [ -f gradlew ]; then
-            ./gradlew assembleDebug --stacktrace -x lint
-          else
-            gradle assembleDebug --stacktrace -x lint
-          fi
-
-          END_TIME=$(date +%s)
-          DURATION=$((END_TIME - START_TIME))
-          echo "✅ Build finished at $(date '+%Y-%m-%d %H:%M:%S')"
-          echo "⏱️  Build duration: ${DURATION} seconds ($(($DURATION / 60)) minutes $(($DURATION % 60)) seconds)"
+          ./gradlew assembleDebug \
+            --stacktrace \
+            --info \
+            -x lint \
+            -x lintVital \
+            --parallel \
+            --max-workers=4 \
+            -Dorg.gradle.daemon=true
 
       - name: Upload APK Artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: HTMLDebugger-Debug
-          path: app/build/outputs/apk/**/*.apk
-          if-no-files-found: warn
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 30
 
-      - name: List build output for debugging
+      - name: Build Summary
         if: always()
-        run: find . -name "*.apk" -type f 2>/dev/null || echo "No APK files found"
+        run: |
+          echo "=== Build Summary ==="
+          if [ -d "app/build/outputs/apk/debug" ]; then
+            echo "✅ APKs generated:"
+            ls -lh app/build/outputs/apk/debug/*.apk || echo "No APK found"
+          else
+            echo "⚠️  No APK output directory found"
+          fi
