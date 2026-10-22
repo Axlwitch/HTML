@@ -23,29 +23,25 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: Install Gradle
+      - name: Install Gradle 7.5
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gradle
+          wget -q https://services.gradle.org/distributions/gradle-7.5-all.zip -O /tmp/gradle-7.5.zip
+          unzip -q /tmp/gradle-7.5.zip -d /tmp
+          echo "/tmp/gradle-7.5/bin" >> $GITHUB_PATH
 
-      - name: Check project structure
+      - name: Generate Gradle wrapper if missing
         run: |
-          echo "== Root =="
-          ls -la
-          echo "== App folder =="
-          ls -la app
-          echo "== Gradle files =="
-          test -f build.gradle
-          test -f settings.gradle
-          test -f app/build.gradle
+          if [ ! -f "./gradlew" ]; then
+            gradle wrapper --gradle-version 7.5
+          fi
 
-      - name: Build APK with Gradle
+      - name: Grant execute permission
+        run: chmod +x ./gradlew
+
+      - name: Build APK
         env:
           GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs='-Xmx3072m -XX:MaxMetaspaceSize=512m'"
-        run: |
-          gradle assembleDebug \
-            --no-daemon \
-            --stacktrace
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK Artifact
         if: success()
@@ -60,7 +56,7 @@ jobs:
         run: |
           echo "=== Build Summary ==="
           if [ -d "app/build/outputs/apk/debug" ]; then
-            echo "✅ APKs generated:"
+            echo "✅ APK generated:"
             ls -lh app/build/outputs/apk/debug/*.apk || echo "No APK found"
           else
             echo "⚠️ No APK output directory found"
