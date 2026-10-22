@@ -19,26 +19,33 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
           distribution: 'temurin'
+          java-version: '17'
           cache: 'gradle'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      # Catatan: Step 'Setup Android SDK' bawaan diganti/dihapus karena 
-      # runner ubuntu-latest sudah punya Android SDK & Cmdline-tools bawaan.
-
-      - name: Build with Gradle
-        env:
-          GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=\"-Xmx3072m -XX:MaxMetaspaceSize=512m\""
+      - name: Install Gradle
         run: |
-          ./gradlew assembleDebug \
+          sudo apt-get update
+          sudo apt-get install -y gradle
+
+      - name: Check project structure
+        run: |
+          echo "== Root =="
+          ls -la
+          echo "== App folder =="
+          ls -la app
+          echo "== Gradle files =="
+          test -f build.gradle
+          test -f settings.gradle
+          test -f app/build.gradle
+
+      - name: Build APK with Gradle
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs='-Xmx3072m -XX:MaxMetaspaceSize=512m'"
+        run: |
+          gradle assembleDebug \
             --no-daemon \
-            --stacktrace \
-            -x test \
-            -x lint \
-            -x lintVital
+            --stacktrace
 
       - name: Upload APK Artifact
         if: success()
@@ -56,5 +63,5 @@ jobs:
             echo "✅ APKs generated:"
             ls -lh app/build/outputs/apk/debug/*.apk || echo "No APK found"
           else
-            echo "⚠️️ No APK output directory found"
+            echo "⚠️ No APK output directory found"
           fi
